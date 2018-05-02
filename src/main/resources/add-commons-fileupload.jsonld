@@ -1,0 +1,62 @@
+[
+  {
+    "specVersion": "1.1.0",
+    "spdx:name": "apache commons-fileupload",
+    "creationInfo": {
+      "spdx:creator": [
+        "Person: Eric Kerwin (ekerwin@synopsys.com)"
+      ],
+      "spdx:created": "2018-05-02T01:14:00.000Z"
+    },
+    "@id": "file://ekerwin-mac/Users/ekerwin/Documents/source/hub-prime/src/main/resources/add-commons-fileupload.jsonld",
+    "@type": "BillOfMaterials",
+    "relationship": []
+  },
+  {
+    "name": "ek-hub-prime",
+    "revision": "1.0.0",
+    "@id": "http:maven/com_blackducksoftware_integration/ek_hub_prime/1_0_0",
+    "@type": "Project",
+    "externalIdentifier": {
+      "externalSystemTypeId": "maven",
+      "externalId": "com.blackducksoftware.integration:ek-hub-prime:1.0.0",
+      "externalIdMetaData": {
+        "forge": {
+          "name": "maven",
+          "separator": ":",
+          "kbSeparator": ":"
+        },
+        "group": "com.blackducksoftware.integration",
+        "name": "ek-hub-prime",
+        "version": "1.0.0"
+      }
+    },
+    "relationship": [
+      {
+        "related": "http:maven/org_jacoco/org_jacoco_agent/0_8_0",
+        "relationshipType": "DYNAMIC_LINK"
+      }
+    ]
+  },
+  {
+    "name": "commons-fileupload",
+    "revision": "1.2.1",
+    "@id": "http:maven/commons_fileuploado/commons_fileupload/1_2_1",
+    "@type": "Component",
+    "externalIdentifier": {
+      "externalSystemTypeId": "maven",
+      "externalId": "commons-fileupload:commons-fileupload:1.2.1",
+      "externalIdMetaData": {
+        "forge": {
+          "name": "maven",
+          "separator": ":",
+          "kbSeparator": ":"
+        },
+        "group": "commons-fileupload",
+        "name": "commons-fileupload",
+        "version": "1.2.1"
+      }
+    },
+    "relationship": []
+  }
+]
