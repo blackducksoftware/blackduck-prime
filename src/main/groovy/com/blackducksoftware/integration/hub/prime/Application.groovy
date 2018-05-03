@@ -1,5 +1,6 @@
 package com.blackducksoftware.integration.hub.prime
 
+import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -84,7 +85,17 @@ class Application {
             Thread.sleep(FIVE_SECONDS)
             notificationResults = notificationResults = notificationService.getAllNotificationResults(nextNotificationStart, nextNotificationEnd)
         }
-        nextNotificationEnd = notificationService.getLatestNotificationDate()
+
+        // FIXME might not have to do this - another call to notificationService.getLatestNotificationDate() might suffice
+        Instant latestCreated = nextNotificationStart.toInstant();
+        notificationResults.notificationContentItems.each { commonNotification ->
+            Instant createdInstant = commonNotification.createdAt.toInstant()
+            if (createdInstant.isAfter(latestCreated)) {
+                latestCreated = createdInstant;
+            }
+        }
+        latestCreated = latestCreated.plus(1, ChronoUnit.MILLIS);
+        nextNotificationEnd = Date.from(latestCreated)
         endDateString = RestConnection.formatDate(nextNotificationEnd);
         logger.info("Found notifications for ${startDateString} to ${endDateString}")
 
