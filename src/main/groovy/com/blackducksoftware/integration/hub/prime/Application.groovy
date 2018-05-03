@@ -13,12 +13,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.annotation.Bean
 
-import com.blackducksoftware.integration.hub.api.generated.view.NotificationView
 import com.blackducksoftware.integration.hub.api.generated.view.PolicyRuleViewV2
 import com.blackducksoftware.integration.hub.api.view.MetaHandler
 import com.blackducksoftware.integration.hub.bdio.model.externalid.ExternalIdFactory
 import com.blackducksoftware.integration.hub.configuration.HubServerConfig
 import com.blackducksoftware.integration.hub.configuration.HubServerConfigBuilder
+import com.blackducksoftware.integration.hub.notification.NotificationResults
+import com.blackducksoftware.integration.hub.notification.content.NotificationContent
 import com.blackducksoftware.integration.hub.rest.RestConnection
 import com.blackducksoftware.integration.hub.service.CodeLocationService
 import com.blackducksoftware.integration.hub.service.ComponentService
@@ -66,24 +67,58 @@ class Application {
         logger.info("Successfully retrieved policy rule: ${noCommonsFileUploadPolicyRule.name}");
 
         Date currentNotificationDate = notificationService.getLatestNotificationDate();
-        println currentNotificationDate
+        bomUpdater.addCommonsFileUpload()
+
         ZonedDateTime utcTime = ZonedDateTime.ofInstant(currentNotificationDate.toInstant(), ZoneOffset.UTC);
         ZonedDateTime nextMillisecond = utcTime.plus(1, ChronoUnit.MILLIS);
         ZonedDateTime nextHour = ZonedDateTime.now(ZoneOffset.UTC).plus(1, ChronoUnit.HOURS);
         Date nextNotificationStart = Date.from(nextMillisecond.toInstant());
         Date nextNotificationEnd = Date.from(nextHour.toInstant());
-        bomUpdater.addCommonsFileUpload()
+        String startDateString = RestConnection.formatDate(nextNotificationStart);
+        String endDateString = RestConnection.formatDate(nextNotificationEnd);
 
-        List<NotificationView> notifications = notificationService.getAllNotifications(nextNotificationStart, nextNotificationEnd)
-        while (notifications.size() < 2) {
-            logger.info("Still haven't found new notifications for ${nextNotificationStart} - ${nextNotificationEnd}.")
+        logger.info("Finding notifications for ${startDateString} to ${endDateString}")
+        NotificationResults notificationResults = notificationService.getAllNotificationResults(nextNotificationStart, nextNotificationEnd)
+        while (!validNotifications(notificationResults)) {
+            logger.info("Still haven't found valid notifications for ${nextNotificationStart} - ${nextNotificationEnd}.")
             Thread.sleep(FIVE_SECONDS)
-            notifications = notificationService.getAllNotifications(nextNotificationStart, nextNotificationEnd)
+            notificationResults = notificationResults = notificationService.getAllNotificationResults(nextNotificationStart, nextNotificationEnd)
         }
-        currentNotificationDate = notificationService.getLatestNotificationDate()
-        println currentNotificationDate
+        nextNotificationEnd = notificationService.getLatestNotificationDate()
+        endDateString = RestConnection.formatDate(nextNotificationEnd);
+        logger.info("Found notifications for ${startDateString} to ${endDateString}")
 
         bomUpdater.removeCommonsFileUpload()
+
+        projectCreator.createProject('notifications-policy_violation_and_vulnerability', 'startDate', startDateString)
+        projectCreator.createProject('notifications-policy_violation_and_vulnerability', 'endDate', endDateString)
+    }
+
+    private boolean validNotifications(NotificationResults notificationResults) {
+        if (notificationResults.notificationContentItems.size() != 2) {
+            return false
+        }
+
+        boolean foundFileUploadVulnerability = false
+        boolean foundFileUploadPolicyViolation = false
+        notificationResults.notificationContentItems.each { commonNotification ->
+            NotificationContent notificationContent = commonNotification.content
+            notificationContent.notificationContentDetails.each { notificationContentDetail ->
+                if (notificationContentDetail.getComponentName().isPresent() && notificationContentDetail.getComponentVersionName().isPresent()) {
+                    String componentName = notificationContentDetail.getComponentName().get();
+                    String componentVersionName = notificationContentDetail.getComponentVersionName().get();
+                    if ('Apache Commons FileUpload'.equals(componentName) && '1.2.1'.equals(componentVersionName)) {
+                        if (notificationContent.providesVulnerabilityDetails()) {
+                            foundFileUploadVulnerability = true
+                        } else if (notificationContent.providesPolicyDetails()) {
+                            foundFileUploadPolicyViolation = true
+                        }
+                    }
+                }
+            }
+        }
+
+        return foundFileUploadVulnerability && foundFileUploadPolicyViolation
     }
 
     @Bean

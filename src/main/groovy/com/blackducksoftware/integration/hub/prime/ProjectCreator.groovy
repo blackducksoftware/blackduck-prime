@@ -17,6 +17,18 @@ class ProjectCreator {
 
     ProjectVersionWrapper createProject(String projectName, String projectVersionName) {
         ProjectRequestBuilder projectRequestBuilder = new ProjectRequestBuilder()
+
+        return populateAndSubmit(projectRequestBuilder, projectName, projectVersionName)
+    }
+
+    ProjectVersionWrapper createProject(String projectName, String projectVersionName, String nickname) {
+        ProjectRequestBuilder projectRequestBuilder = new ProjectRequestBuilder()
+        projectRequestBuilder.versionNickname = nickname
+
+        return populateAndSubmit(projectRequestBuilder, projectName, projectVersionName)
+    }
+
+    private ProjectVersionWrapper populateAndSubmit(ProjectRequestBuilder projectRequestBuilder, String projectName, String projectVersionName) {
         projectRequestBuilder.projectName = projectName
         projectRequestBuilder.versionName = projectVersionName
         projectRequestBuilder.phase = ProjectVersionPhaseType.DEVELOPMENT.name()
