@@ -7,7 +7,7 @@ buildscript {
 
     dependencies {
         classpath 'com.blackducksoftware.integration:common-gradle-plugin:0.0.+'
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.1.3.RELEASE'
     }
 }
 
@@ -21,14 +21,10 @@ apply plugin: 'com.blackducksoftware.integration.solution'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-repositories {
-	mavenLocal()
-}
-
 dependencies {
-    compile 'com.blackducksoftware.integration:hub-common:31.1.0-SNAPSHOT'
-    compile 'org.springframework.boot:spring-boot-starter'
-    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+    implementation 'com.blackducksoftware.integration:blackduck-common:42.1.0'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.codehaus.groovy:groovy-all:2.5.6'
 }
 
-springBoot { mainClassName = 'com.blackducksoftware.integration.hub.common.sandbox.Application' }
+springBoot { mainClassName = 'com.synopsys.integration.blackduck.prime.Application' }
