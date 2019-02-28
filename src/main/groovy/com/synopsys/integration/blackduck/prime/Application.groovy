@@ -47,7 +47,7 @@ import org.springframework.context.annotation.Bean
 class Application implements CommandLineRunner {
     private final Logger logger = LoggerFactory.getLogger(Application.class)
 
-    public static final EnumSet<Action> DEFAULT_ACTIONS = EnumSet.allOf(Action.class)
+    public static final Set<Action> DEFAULT_ACTIONS = EnumSet.allOf(Action.class)
 
     @Value('${blackduck.url:}')
     private String blackduckUrl
@@ -87,10 +87,10 @@ class Application implements CommandLineRunner {
                 .findAll { EnumUtils.isValidEnum(Action.class, it) }
                 .collect { Action.valueOf(it) }
 
-        EnumSet<Action> actionsToPerform = DEFAULT_ACTIONS;
+        Set<Action> actionsToPerform = DEFAULT_ACTIONS
         if (providedActions) {
-            logger.info('Found provided actions.');
-            actionsToPerform = EnumSet.of(providedActions)
+            logger.info('Found provided actions.')
+            actionsToPerform = new HashSet<>((providedActions))
         }
 
         logger.info("Attempting the following actions: ${StringUtils.join(actionsToPerform.collect { it.name() })}")
