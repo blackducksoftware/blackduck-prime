@@ -15,8 +15,6 @@ plugins {
     id 'groovy'
 }
 
-version = '0.0.1-SNAPSHOT'
-
 apply plugin: 'com.blackducksoftware.integration.solution'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
